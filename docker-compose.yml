@@ -14,10 +14,11 @@ services:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
 
-# El dashboard solo expone un puerto (no habla con otros contenedores), así que
-# reusa la red 'bridge' existente en vez de crear una nueva. Esto evita el error
-# "all predefined address pools have been fully subnetted" en el VPS compartido.
+# El dashboard solo expone un puerto (no habla con otros contenedores). Reusa la
+# red compartida 'postgresql_default' (ya existe, user-defined) en vez de crear
+# una nueva: así evita el error "all predefined address pools have been fully
+# subnetted" en el VPS compartido.
 networks:
   default:
-    name: bridge
+    name: postgresql_default
     external: true
