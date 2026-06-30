@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Salida standalone para empaquetar en Docker (despliegue en el VPS).
+  output: "standalone",
 };
 
 export default nextConfig;

@@ -1,65 +1,106 @@
-import Image from "next/image";
+"use client";
+import { useEffect, useState } from "react";
+import { getSummary, type Summary } from "@/lib/api";
+import { fmtDateTime, statusColor } from "@/lib/format";
+import StatCard from "./components/StatCard";
 
-export default function Home() {
+export default function ResumenPage() {
+  const [data, setData] = useState<Summary | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [updated, setUpdated] = useState<Date | null>(null);
+
+  async function load() {
+    try {
+      setData(await getSummary());
+      setError(null);
+      setUpdated(new Date());
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Error");
+    }
+  }
+
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 10000); // refresco cada 10s (supervisión en vivo)
+    return () => clearInterval(t);
+  }, []);
+
+  const c = data?.counts;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Resumen general</h1>
+        <div className="text-xs text-zinc-500">
+          {updated ? `Actualizado ${updated.toLocaleTimeString("es-PE")}` : "Cargando..."}
+          <button onClick={load} className="ml-3 px-2 py-1 bg-blue-600 text-white rounded">
+            Refrescar
+          </button>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {error && <div className="bg-red-100 text-red-700 p-3 rounded">Error: {error}</div>}
+
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Médicos" value={c?.doctores ?? "—"} accent="blue" />
+        <StatCard label="Pacientes" value={c?.pacientes ?? "—"} accent="purple" />
+        <StatCard label="Pulseras" value={c?.pulseras ?? "—"} accent="green" />
+        <StatCard label="Registros (total)" value={c?.registros_total ?? "—"} accent="zinc" />
+      </section>
+
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Consultas hoy" value={c?.consultas_hoy ?? "—"} accent="blue" />
+        <StatCard label="Registros hoy" value={c?.registros_hoy ?? "—"} accent="red" />
+        <StatCard label="Consultas (total)" value={c?.consultas_total ?? "—"} accent="zinc" />
+      </section>
+
+      <section>
+        <h2 className="text-lg font-semibold mb-3">Últimos registros</h2>
+        <div className="overflow-x-auto bg-white rounded-xl shadow-sm">
+          <table className="w-full text-sm">
+            <thead className="bg-zinc-100 text-zinc-600">
+              <tr>
+                <th className="text-left p-3">Hora</th>
+                <th className="text-left p-3">Paciente</th>
+                <th className="text-left p-3">Médico</th>
+                <th className="text-left p-3">PPG</th>
+                <th className="text-left p-3">Momento</th>
+                <th className="text-left p-3">Estado</th>
+                <th className="text-left p-3">Fuente</th>
+                <th className="text-left p-3">Consulta</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.ultimos_registros.length ? (
+                data.ultimos_registros.map((r) => (
+                  <tr key={r.id} className="border-t border-zinc-100">
+                    <td className="p-3 whitespace-nowrap">{fmtDateTime(r.captured_at)}</td>
+                    <td className="p-3">{r.paciente_code ?? "—"}</td>
+                    <td className="p-3">
+                      {r.doctor_name ? `${r.doctor_name} ${r.doctor_lastname ?? ""}` : "—"}
+                    </td>
+                    <td className="p-3 font-medium">{r.ppg ?? "—"}</td>
+                    <td className="p-3">{r.phase ?? "—"}</td>
+                    <td className="p-3">
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${statusColor(r.status)}`}>
+                        {r.status ?? "—"}
+                      </span>
+                    </td>
+                    <td className="p-3">{r.source ?? "—"}</td>
+                    <td className="p-3">#{r.consultation_id}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={8} className="p-6 text-center text-zinc-400">
+                    Sin registros todavía.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      </main>
+      </section>
     </div>
   );
 }
