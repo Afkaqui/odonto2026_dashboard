@@ -12,15 +12,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Panel clínico: tema CLARO fijo (no seguir el modo oscuro del SO, que dejaba
+   el texto gris tenue sobre fondo negro e ilegible). */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #f4f6f8;
+  color: #171717;
   font-family: Arial, Helvetica, sans-serif;
 }
