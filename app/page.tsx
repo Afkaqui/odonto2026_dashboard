@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getSummary, type Summary } from "@/lib/api";
+import { getSummary, deleteRecord, type Summary } from "@/lib/api";
 import { fmtDateTime, statusColor } from "@/lib/format";
 import StatCard from "./components/StatCard";
 
@@ -24,6 +24,16 @@ export default function ResumenPage() {
     const t = setInterval(load, 10000); // refresco cada 10s (supervisión en vivo)
     return () => clearInterval(t);
   }, []);
+
+  async function borrar(id: string) {
+    if (!confirm(`¿Eliminar el registro #${id}? Esta acción no se puede deshacer.`)) return;
+    try {
+      await deleteRecord(id);
+      await load();
+    } catch (e) {
+      alert("No se pudo eliminar: " + (e instanceof Error ? e.message : e));
+    }
+  }
 
   const c = data?.counts;
 
@@ -68,6 +78,7 @@ export default function ResumenPage() {
                 <th className="text-left p-3">Estado</th>
                 <th className="text-left p-3">Fuente</th>
                 <th className="text-left p-3">Consulta</th>
+                <th className="text-left p-3"></th>
               </tr>
             </thead>
             <tbody>
@@ -88,11 +99,20 @@ export default function ResumenPage() {
                     </td>
                     <td className="p-3">{r.source ?? "—"}</td>
                     <td className="p-3">#{r.consultation_id}</td>
+                    <td className="p-3">
+                      <button
+                        onClick={() => borrar(r.id)}
+                        className="text-red-600 hover:text-red-800 hover:bg-red-50 rounded px-2 py-1"
+                        title="Eliminar registro"
+                      >
+                        🗑
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="p-6 text-center text-zinc-400">
+                  <td colSpan={9} className="p-6 text-center text-zinc-400">
                     Sin registros todavía.
                   </td>
                 </tr>

@@ -11,6 +11,15 @@ async function get<T>(path: string): Promise<T> {
   return r.json() as Promise<T>;
 }
 
+async function del(path: string): Promise<void> {
+  const r = await fetch(`${BASE}${path}`, {
+    method: "DELETE",
+    headers: { "X-API-Key": KEY },
+    cache: "no-store",
+  });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+}
+
 // ---- Tipos ----
 export type Counts = {
   doctores: string;
@@ -63,3 +72,4 @@ export const getBracelets = () => get<{ bracelets: Bracelet[] }>("/api/bracelets
 export const getDoctors = () => get<{ doctors: Doctor[] }>("/api/doctors");
 export const getConsultation = (id: string) =>
   get<{ consultation: ConsultationRow; records: RecordRow[] }>(`/api/consultations/${id}`);
+export const deleteRecord = (id: string) => del(`/api/records/${id}`);
