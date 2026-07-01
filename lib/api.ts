@@ -17,7 +17,19 @@ async function del(path: string): Promise<void> {
     headers: { "X-API-Key": KEY },
     cache: "no-store",
   });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || `HTTP ${r.status}`); }
+}
+
+async function patch<T>(path: string, body: unknown): Promise<T> {
+  const r = await fetch(`${BASE}${path}`, {
+    method: "PATCH",
+    headers: { "X-API-Key": KEY, "Content-Type": "application/json" },
+    cache: "no-store",
+    body: JSON.stringify(body),
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j as T;
 }
 
 // ---- Tipos ----
@@ -35,7 +47,8 @@ export type RecordRow = {
   id: string;
   captured_at: string;
   ppg: number | null;
-  phase: string | null;
+  phase_num: number | null;
+  phase_label: string | null;
   status: string | null;
   source: string | null;
   consultation_id: string;
@@ -63,6 +76,11 @@ export type ConsultationRow = {
 
 export type SessionResp = { ok: boolean; date: string; total: number; consultas: ConsultationRow[] };
 
+export type Patient = {
+  id: string; code: string | null; name: string | null;
+  age: number | null; gender: string | null; consultas?: string; created_at: string;
+};
+
 export type Bracelet = { id: string; code: string | null; type: string | null; created_at: string };
 export type Doctor = { id: string; name: string; lastname: string; username: string; created_at: string };
 
@@ -75,3 +93,14 @@ export const getDoctors = () => get<{ doctors: Doctor[] }>("/api/doctors");
 export const getConsultation = (id: string) =>
   get<{ consultation: ConsultationRow; records: RecordRow[] }>(`/api/consultations/${id}`);
 export const deleteRecord = (id: string) => del(`/api/records/${id}`);
+export const updateRecord = (id: string, body: { status?: string; phase_label?: string; phase_num?: number }) =>
+  patch(`/api/records/${id}`, body);
+
+// Gestión de pacientes
+export const getPatients = (q?: string) =>
+  get<{ patients: Patient[] }>(`/api/patients${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+export const getPatientDetail = (id: string) =>
+  get<{ patient: Patient; consultations: ConsultationRow[] }>(`/api/patients/${id}`);
+export const updatePatient = (id: string, body: Partial<Patient>) =>
+  patch(`/api/patients/${id}`, body);
+export const deletePatient = (id: string) => del(`/api/patients/${id}`);

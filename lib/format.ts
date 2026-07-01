@@ -18,6 +18,22 @@ export function fmtDuration(seconds: number | null): string {
   return `${m}m ${s}s`;
 }
 
+// Nivel de ansiedad (a1 menor .. a5 mayor) -> etiqueta legible.
+export function anxLabel(status: string | null): string {
+  const map: Record<string, string> = {
+    a1: "Muy baja", a2: "Baja", a3: "Media", a4: "Alta", a5: "Muy alta",
+  };
+  if (!status) return "—";
+  return `${status.toUpperCase()} · ${map[status] ?? status}`;
+}
+
+// Momento -> "#num · etiqueta"
+export function momentoLabel(num: number | null, label: string | null): string {
+  const n = num != null ? `#${num}` : "";
+  const l = label ?? "";
+  return [n, l].filter(Boolean).join(" · ") || "—";
+}
+
 // Color por estado de ansiedad (a1..a5). a1 = calmado ... a5 = muy ansioso.
 export function statusColor(status: string | null): string {
   switch (status) {

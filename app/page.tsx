@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getSummary, deleteRecord, type Summary } from "@/lib/api";
-import { fmtDateTime, statusColor } from "@/lib/format";
+import { fmtDateTime, statusColor, anxLabel, momentoLabel } from "@/lib/format";
 import StatCard from "./components/StatCard";
 
 export default function ResumenPage() {
@@ -91,10 +91,10 @@ export default function ResumenPage() {
                       {r.doctor_name ? `${r.doctor_name} ${r.doctor_lastname ?? ""}` : "—"}
                     </td>
                     <td className="p-3 font-medium">{r.ppg ?? "—"}</td>
-                    <td className="p-3">{r.phase ?? "—"}</td>
+                    <td className="p-3">{momentoLabel(r.phase_num, r.phase_label)}</td>
                     <td className="p-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs ${statusColor(r.status)}`}>
-                        {r.status ?? "—"}
+                        {anxLabel(r.status)}
                       </span>
                     </td>
                     <td className="p-3">{r.source ?? "—"}</td>
