@@ -72,7 +72,7 @@ export default function JornadaPage() {
               data.consultas.map((c) => (
                 <tr key={c.id} className="border-t border-zinc-100">
                   <td className="p-3">{c.id}</td>
-                  <td className="p-3">{c.paciente_code ?? "—"}</td>
+                  <td className="p-3">{c.paciente_name ?? c.paciente_code ?? "—"}</td>
                   <td className="p-3">{c.paciente_edad ?? "—"}</td>
                   <td className="p-3">
                     {c.doctor_name ? `${c.doctor_name} ${c.doctor_lastname ?? ""}` : "—"}

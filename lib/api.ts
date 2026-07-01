@@ -40,6 +40,7 @@ export type RecordRow = {
   source: string | null;
   consultation_id: string;
   paciente_code: string | null;
+  paciente_name: string | null;
   doctor_name: string | null;
   doctor_lastname: string | null;
 };
@@ -49,6 +50,7 @@ export type Summary = { ok: boolean; counts: Counts; ultimos_registros: RecordRo
 export type ConsultationRow = {
   id: string;
   paciente_code: string | null;
+  paciente_name: string | null;
   paciente_edad: number | null;
   doctor_name: string | null;
   doctor_lastname: string | null;

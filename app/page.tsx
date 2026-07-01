@@ -39,7 +39,7 @@ export default function ResumenPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">Resumen general</h1>
         <div className="text-xs text-zinc-500">
           {updated ? `Actualizado ${updated.toLocaleTimeString("es-PE")}` : "Cargando..."}
@@ -86,7 +86,7 @@ export default function ResumenPage() {
                 data.ultimos_registros.map((r) => (
                   <tr key={r.id} className="border-t border-zinc-100">
                     <td className="p-3 whitespace-nowrap">{fmtDateTime(r.captured_at)}</td>
-                    <td className="p-3">{r.paciente_code ?? "—"}</td>
+                    <td className="p-3">{r.paciente_name ?? r.paciente_code ?? "—"}</td>
                     <td className="p-3">
                       {r.doctor_name ? `${r.doctor_name} ${r.doctor_lastname ?? ""}` : "—"}
                     </td>
